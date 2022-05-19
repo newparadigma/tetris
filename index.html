@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="utf-8">
+    <title>snake</title>
+</head>
+<body>
+    <canvas id="canvas" width="100" height="200" style="background-color: gray"></canvas>
+</body>
+
+<script type="text/javascript">
+const canvas = document.getElementById('canvas')
+const ctx = canvas.getContext('2d')
+
+const scale = 10
+const rows = canvas.height / scale
+const cols = canvas.width / scale
+
+let direction = null;
+
+let figure = []
+let frozenFigures = []
+
+const figures = [
+    {
+        color: "red",
+        cells: [
+            {x: 0, y: 0},
+            {x: 1, y: 0},
+            {x: 0, y: 1},
+            {x: 1, y: 1},
+        ]
+    }
+]
+
+function getRandomFigure() {
+    figure = figures[0];
+    // console.log(figure)
+    // console.log(figures[0])
+}
+
+function moveFigureDown() {
+    figure.cells.forEach(function(item, index, array) {
+        // checkCollisionWithBottom()
+        item.y += scale;
+    })
+}
+
+function checkCollisionWithBottom() {
+    figure.cells.forEach(function(item, index, array) {
+        const y = item.y + scale
+        if (y > canvas.height) {
+            frozenFigures.unshift(figure);
+            getRandomFigure()
+        }
+    })
+}
+
+function drawFigure() {
+    figure.cells.forEach(function(item, index, array) {
+        ctx.fillStyle = figure.color
+        ctx.fillRect(item.x, item.y, scale, scale)
+    })
+}
+
+function drawFrozenFigures() {
+    frozenFigures.forEach(function(frozenFigure, index, array) {
+        frozenFigure.cells.forEach(function(item, index, array) {
+            ctx.fillStyle = figure.color
+            ctx.fillRect(item.x, item.y, scale, scale)
+        })
+    })
+}
+
+(function setup() {
+    getRandomFigure()
+
+    myInterval = setInterval(() => {
+        drawAllFigures()
+        moveFigureDown()
+    }, 500)
+}())
+
+function drawAllFigures() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    drawFrozenFigures()
+    drawFigure()
+}
+
+document.addEventListener('keydown', logKey)
+
+function logKey(event) {
+    if (event.code.search("Arrow") === 0) {
+        direction = event.code.replace('Arrow', '')
+        moveFigure()
+        drawAllFigures()
+    }
+}
+
+function moveFigure() {
+    figure.cells.forEach(function(item, index, array) {
+        const cell = getNewFigureCellLocation(item)
+        if (!checkCellCollisionWithWalls(cell)) {
+            item = cell;
+        }
+    })
+}
+
+function checkCellCollisionWithWalls(cell) {
+    if (cell.x < scale || cell.x > canvas.width - scale) {
+        return true;
+    }
+
+    return false;
+}
+
+
+function getNewFigureCellLocation(cell) {
+    const object = {
+        'Up': {
+            x: 0, y: -1
+        },
+        'Down': {
+            x: 0, y: 1
+        },
+        'Left': {
+            x: -1, y: 0
+        },
+        'Right': {
+            x: 1, y: 0
+        }
+    }
+    cell.x += object[direction].x * scale
+    cell.y += object[direction].y * scale
+
+    return cell
+}
+</script>
+</html>
