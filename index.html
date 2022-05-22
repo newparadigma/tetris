@@ -5,16 +5,14 @@
     <title>tetris</title>
 </head>
 <body>
-    <canvas id="canvas" width="100" height="200" style="background-color: gray"></canvas>
+    <canvas id="canvas" width="400" height="800" style="background-color: gray"></canvas>
 </body>
 
 <script type="text/javascript">
 const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')
 
-const scale = 10
-const rows = canvas.height / scale
-const cols = canvas.width / scale
+const scale = 40
 
 let figure = []
 let frozenFigures = []
@@ -38,15 +36,15 @@ const figures = [
             {x: 1, y: 1},
         ]
     },
-    {
-        color: "black",
-        cells: [
-            {x: 0, y: 0},
-            {x: 0, y: 1},
-            {x: 0, y: 2},
-            {x: 0, y: 3},
-        ]
-    }
+    // {
+    //     color: "red",
+    //     cells: [
+    //         {x: 0, y: 0},
+    //         {x: 0, y: 1},
+    //         {x: 0, y: 2},
+    //         {x: 0, y: 3},
+    //     ]
+    // }
 ]
 
 function getRandomFigure() {
@@ -100,7 +98,7 @@ function checkCollisionWithBorders(newFigureCells) {
 
     myInterval = setInterval(() => {
         drawAllFigures()
-        // moveFigure("Down")
+        moveFigure("Down")
     }, 500)
 }())
 
@@ -152,67 +150,17 @@ function drawFigure() {
 function drawFrozenFigures() {
     frozenFigures.forEach(function(frozenFigure, index, array) {
         frozenFigure.cells.forEach(function(item, index, array) {
-            ctx.fillStyle = figure.color
+            ctx.fillStyle = frozenFigure.color
             ctx.fillRect(item.x, item.y, scale, scale)
         })
     })
 }
 
-// (function setup() {
-//     getRandomFigure()
-//
-//     myInterval = setInterval(() => {
-//         drawAllFigures()
-//         // moveFigureDown()
-//     }, 500)
-// }())
-//
 function drawAllFigures() {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     drawFrozenFigures()
     drawFigure()
 }
-//
-// document.addEventListener('keydown', logKey)
-//
-// function logKey(event) {
-//     if (event.code.search("Arrow") === 0) {
-//         direction = event.code.replace('Arrow', '')
-//         moveFigure()
-//         checkCollisionWithBottom()
-//         drawAllFigures()
-//     }
-// }
-//
-// function moveFigure() {
-//     const cells = []
-//     let collision = false
-//     let collisionWithFrozenFigures = false
-//     figure.cells.forEach(function(item, index, array) {
-//         const cell = getNewCellLocation(item)
-//         collisionWithFrozenFigures = checkCollisionWithFrozenFigures(item)
-//
-//         if (!collisionWithFrozenFigures) {
-//             if (cell.x < 0 || cell.x > canvas.width || cell.y < 0 || cell.y > canvas.height) {
-//                 collision = true
-//                 return
-//             }
-//         }
-//
-//         cells.unshift(cell)
-//     })
-//
-//     if (!collision && !collisionWithFrozenFigures) {
-//         figure.cells = cells
-//     }
-//
-//     if (collisionWithFrozenFigures) {
-//         addFigureToFrozenFigures()
-//     }
-// }
-//
-
-
 
 function getNewCellLocation(cell, direction) {
     const object = {
@@ -234,6 +182,15 @@ function getNewCellLocation(cell, direction) {
         x: cell.x + object[direction].x * scale,
         y: cell.y + object[direction].y * scale
     }
+}
+
+function checkRowIsFull() {
+    // frozenFigures.forEach(function(frozenFigure, index, array) {
+    //     frozenFigure.cells.forEach(function(item, index, array) {
+    //         ctx.fillStyle = frozenFigure.color
+    //         ctx.fillRect(item.x, item.y, scale, scale)
+    //     })
+    // })
 }
 
 </script>
