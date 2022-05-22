@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
 <head>
     <meta charset="utf-8">
-    <title>snake</title>
+    <title>tetris</title>
 </head>
 <body>
     <canvas id="canvas" width="100" height="200" style="background-color: gray"></canvas>
@@ -16,14 +16,24 @@ const scale = 10
 const rows = canvas.height / scale
 const cols = canvas.width / scale
 
-let direction = null;
-
 let figure = []
 let frozenFigures = []
 
+document.addEventListener('keydown', logKey)
+
+function logKey(event) {
+    if (event.code.search("Arrow") === 0) {
+        const direction = event.code.replace('Arrow', '')
+        moveFigure(direction)
+
+        // checkCollisionWithBottom()
+        // drawAllFigures()
+    }
+}
+
 const figures = [
     {
-        color: "red",
+        color: "black",
         cells: [
             {x: 0, y: 0},
             {x: 1, y: 0},
@@ -34,33 +44,94 @@ const figures = [
 ]
 
 function getRandomFigure() {
-    figure = structuredClone(figures[0]);
+    figure = structuredClone(figures[0])
 }
 
-function moveFigureDown() {
-    figure.cells.forEach(function(item, index, array) {
-        item.y += scale;
+function moveFigure(direction) {
+    const newFigureCells = []
+    figure.cells.forEach(function(cell, index, array) {
+        const newCell = getNewCellLocation(cell, direction);
+        newFigureCells.unshift(newCell)
     })
+
+    if (checkCollisionWithFrozenFigures(newFigureCells)) {
+        if (direction === "Down") {
+            addFigureToFrozenFigures()
+        }
+        return
+    }
+
+    if (direction === "Down") {
+        if (checkCollisionWithBottom(newFigureCells)) {
+            addFigureToFrozenFigures()
+            return
+        }
+    }
+
+    if (checkCollisionWithBorders(newFigureCells)) {
+        return;
+    }
+
+    figure.cells = newFigureCells
+    drawAllFigures()
 }
 
-function checkCollisionWithBottom() {
-    let froze = false;
-    figure.cells.forEach(function(item, index, array) {
-        const y = item.y + scale
-        if (y > canvas.height) {
-            console.log('froze')
-            froze = true
+function checkCollisionWithBorders(newFigureCells) {
+    let collision = false
+    newFigureCells.every(cell => {
+        if (cell.x < 0 || cell.x > canvas.width || cell.y < 0 || cell.y > canvas.height) {
+            collision = true;
             return
         }
     })
 
-    if (froze) {
-        addFigureToFrozenFigures()
-    }
+    return collision
+}
+
+(function setup() {
+    getRandomFigure()
+
+    myInterval = setInterval(() => {
+        drawAllFigures()
+        // moveFigure("Down")
+    }, 500)
+}())
+
+function checkCollisionWithBottom(newFigureCells) {
+    let collision = false
+    newFigureCells.every(cell => {
+        if (cell.y >= canvas.height) {
+            collision = true;
+            return
+        }
+    })
+
+    return collision
+}
+
+function checkCollisionWithFrozenFigures(newFigureCells) {
+    let collision = false;
+    newFigureCells.every(newFigureCell => {
+        if (!collision) {
+            // тут почему то при использовании every цикл делал только 1 итерацию
+            frozenFigures.forEach(function(frozenFigure, index, array) {
+                if (!collision) {
+                    frozenFigure.cells.every(frozenFigureCell => {
+                        if (newFigureCell.x === frozenFigureCell.x && newFigureCell.y === frozenFigureCell.y) {
+                            collision = true
+                            return
+                        }
+                    })
+                }
+            })
+        }
+    })
+
+    return collision
 }
 
 function addFigureToFrozenFigures() {
-    frozenFigures.unshift(structuredClone(figure));
+    frozenFigures.unshift(structuredClone(figure))
     getRandomFigure()
 }
 
@@ -80,74 +151,63 @@ function drawFrozenFigures() {
     })
 }
 
-(function setup() {
-    getRandomFigure()
-
-    myInterval = setInterval(() => {
-        drawAllFigures()
-        // moveFigureDown()
-    }, 500)
-}())
-
+// (function setup() {
+//     getRandomFigure()
+//
+//     myInterval = setInterval(() => {
+//         drawAllFigures()
+//         // moveFigureDown()
+//     }, 500)
+// }())
+//
 function drawAllFigures() {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     drawFrozenFigures()
     drawFigure()
 }
+//
+// document.addEventListener('keydown', logKey)
+//
+// function logKey(event) {
+//     if (event.code.search("Arrow") === 0) {
+//         direction = event.code.replace('Arrow', '')
+//         moveFigure()
+//         checkCollisionWithBottom()
+//         drawAllFigures()
+//     }
+// }
+//
+// function moveFigure() {
+//     const cells = []
+//     let collision = false
+//     let collisionWithFrozenFigures = false
+//     figure.cells.forEach(function(item, index, array) {
+//         const cell = getNewCellLocation(item)
+//         collisionWithFrozenFigures = checkCollisionWithFrozenFigures(item)
+//
+//         if (!collisionWithFrozenFigures) {
+//             if (cell.x < 0 || cell.x > canvas.width || cell.y < 0 || cell.y > canvas.height) {
+//                 collision = true
+//                 return
+//             }
+//         }
+//
+//         cells.unshift(cell)
+//     })
+//
+//     if (!collision && !collisionWithFrozenFigures) {
+//         figure.cells = cells
+//     }
+//
+//     if (collisionWithFrozenFigures) {
+//         addFigureToFrozenFigures()
+//     }
+// }
+//
 
-document.addEventListener('keydown', logKey)
 
-function logKey(event) {
-    if (event.code.search("Arrow") === 0) {
-        direction = event.code.replace('Arrow', '')
-        moveFigure()
-        checkCollisionWithBottom()
-        drawAllFigures()
-    }
-}
 
-function moveFigure() {
-    const cells = []
-    let collision = false;
-    let collisionWithFrozenFigures = false;
-    figure.cells.forEach(function(item, index, array) {
-        const cell = getNewCellLocation(item);
-        collisionWithFrozenFigures = checkCollisionWithFrozenFigures(item)
-
-        if (!collisionWithFrozenFigures) {
-            if (cell.x < 0 || cell.x > canvas.width || cell.y < 0 || cell.y > canvas.height) {
-                collision = true;
-                return;
-            }
-        }
-
-        cells.unshift(cell)
-    })
-
-    if (!collision && !collisionWithFrozenFigures) {
-        figure.cells = cells
-    }
-
-    if (collisionWithFrozenFigures) {
-        addFigureToFrozenFigures()
-    }
-}
-
-function checkCollisionWithFrozenFigures(cell) {
-    let result = false;
-    frozenFigures.forEach(function(frozenFigure, index, array) {
-        frozenFigure.cells.forEach(function(frozenFigureCell, index, array) {
-            if (cell.x === frozenFigureCell.x && cell.y === frozenFigureCell.y) {
-                result = true;
-                return;
-            }
-        })
-    })
-
-    return result;
-}
-
-function getNewCellLocation(cell) {
+function getNewCellLocation(cell, direction) {
     const object = {
         'Up': {
             x: 0, y: -1
@@ -168,5 +228,6 @@ function getNewCellLocation(cell) {
         y: cell.y + object[direction].y * scale
     }
 }
+
 </script>
 </html>
