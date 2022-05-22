@@ -25,9 +25,6 @@ function logKey(event) {
     if (event.code.search("Arrow") === 0) {
         const direction = event.code.replace('Arrow', '')
         moveFigure(direction)
-
-        // checkCollisionWithBottom()
-        // drawAllFigures()
     }
 }
 
@@ -40,11 +37,21 @@ const figures = [
             {x: 0, y: 1},
             {x: 1, y: 1},
         ]
+    },
+    {
+        color: "black",
+        cells: [
+            {x: 0, y: 0},
+            {x: 0, y: 1},
+            {x: 0, y: 2},
+            {x: 0, y: 3},
+        ]
     }
 ]
 
 function getRandomFigure() {
-    figure = structuredClone(figures[0])
+    const randomFigure = figures[Math.floor(Math.random()*figures.length)];
+    figure = structuredClone(randomFigure)
 }
 
 function moveFigure(direction) {
